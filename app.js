@@ -92,6 +92,12 @@ modeSelect.appendChild(option2);
 modeSelect.style.margin = '10px 0';
 document.body.insertBefore(modeSelect, container);
 
+// 問題リセットボタンを作成
+const resetButton = document.createElement('button');
+resetButton.textContent = '問題をリセット';
+resetButton.style.margin = '10px 0';
+document.body.insertBefore(resetButton, container);
+
 // ポケモン表示部分をクリアする関数
 function clearPokemon() {
     while (container.firstChild) {
@@ -168,4 +174,12 @@ showPokemon('shinyOne');
 // モード切り替え時
 modeSelect.addEventListener('change', () => {
     showPokemon(modeSelect.value);
+});
+
+// リセットボタンの処理
+resetButton.addEventListener('click', () => {
+    showPokemon(modeSelect.value);
+    answerDiv.textContent = '';
+    resultDiv.textContent = '';
+    answerInput.value = '';
 });

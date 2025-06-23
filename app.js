@@ -6,28 +6,6 @@ const baseURL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprite
 // ランダムで1体だけ色違いにする
 const shinyIndex = Math.floor(Math.random() * 151) + 1;
 
-for (let i = 1; i <= 151; i++) {
-    const pokemonDiv = document.createElement('div');
-    pokemonDiv.classList.add('pokemon');
-
-    const label = document.createElement('span');
-    label.innerText = `#${i}`;
-
-    const img = document.createElement('img');
-    // 色違い画像のURL（shiny）に切り替え
-    if (i === shinyIndex) {
-        img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png`;
-        img.alt = '色違いポケモン';
-    } else {
-        img.src = `${baseURL}${i}.png`;
-        img.alt = '通常ポケモン';
-    }
-
-    pokemonDiv.appendChild(img);
-    pokemonDiv.appendChild(label);
-    container.appendChild(pokemonDiv);
-}
-
 // 問題文を表示
 const questionDiv = document.createElement('div');
 questionDiv.textContent = '151匹の中に1匹だけ色違いのポケモンがいます。どの番号でしょう？';
@@ -105,15 +83,27 @@ function clearPokemon() {
     }
 }
 
+// ポケモン名を取得して表示する部分を追加
+async function getPokemonName(id) {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`);
+    const data = await res.json();
+    // 日本語名を取得
+    const jpName = data.names.find(n => n.language.name === 'ja');
+    return jpName ? jpName.name : data.name;
+}
+
 // ポケモンを表示する関数
-function showPokemon(mode) {
+async function showPokemon(mode) {
     clearPokemon();
     const randomIndex = Math.floor(Math.random() * 151) + 1;
     for (let i = 1; i <= 151; i++) {
         const pokemonDiv = document.createElement('div');
         pokemonDiv.classList.add('pokemon');
         const label = document.createElement('span');
-        label.innerText = `#${i}`;
+        // 名前を取得して表示
+        getPokemonName(i).then(name => {
+            label.innerHTML = `#${i}<br>${name}`; // 数字と名前の間で改行
+        });
         const img = document.createElement('img');
         if (mode === 'shinyOne') {
             // 1匹だけ色違い

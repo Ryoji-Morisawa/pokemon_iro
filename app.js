@@ -95,6 +95,7 @@ async function getPokemonName(id) {
 // ポケモンを表示する関数
 async function showPokemon(mode) {
     clearPokemon();
+    let selectedNumber = null; // 選択中の番号を管理
     const randomIndex = Math.floor(Math.random() * 151) + 1;
     for (let i = 1; i <= 151; i++) {
         const pokemonDiv = document.createElement('div');
@@ -124,6 +125,15 @@ async function showPokemon(mode) {
                 img.alt = '色違いポケモン';
             }
         }
+        // 画像クリックで選択・入力欄に反映＆枠付与
+        pokemonDiv.addEventListener('click', () => {
+            selectedNumber = i;
+            answerInput.value = i;
+            // 全ての選択枠を外す
+            document.querySelectorAll('.pokemon.selected').forEach(el => el.classList.remove('selected'));
+            // 今選択したものに枠をつける
+            pokemonDiv.classList.add('selected');
+        });
         pokemonDiv.appendChild(img);
         pokemonDiv.appendChild(label);
         container.appendChild(pokemonDiv);

@@ -112,3 +112,9 @@ button[type="submit"] {
     align-items: center;
     gap: 8px;
 }
+
+/* app.cssに追加 */
+.pokemon.selected {
+    border: 3px solid #0078d7;
+    box-shadow: 0 0 8px #0078d7;
+}

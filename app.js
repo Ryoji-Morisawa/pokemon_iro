@@ -175,7 +175,14 @@ async function showPokemon(mode) {
         questionDiv.textContent = '151匹の中に1匹だけ通常色のポケモンがいます（このモードは難易度が高いです）。どの番号でしょう？';
         answerButton.onclick = async () => {
             const name = await getPokemonName(randomIndex);
-            answerDiv.textContent = `通常色のポケモン番号は #${randomIndex} ${name} です`;
+            // 通常色と色違いの画像URL（サイズを128pxに変更）
+            const normalImg = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${randomIndex}.png" alt="通常色" style="width:128px;height:128px;">`;
+            const shinyImg = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${randomIndex}.png" alt="色違い" style="width:128px;height:128px;">`;
+            answerDiv.innerHTML = `
+                正解は #${randomIndex} ${name} です<br>
+                <span>通常色</span>${normalImg}
+                <span style="margin-left:16px;">色違い</span>${shinyImg}
+            `;
         };
         answerForm.onsubmit = async (e) => {
             e.preventDefault();

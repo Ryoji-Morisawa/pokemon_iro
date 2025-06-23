@@ -10,17 +10,14 @@ const shinyIndex = Math.floor(Math.random() * 151) + 1;
 const questionDiv = document.createElement('div');
 questionDiv.textContent = '151匹の中に1匹だけ色違いのポケモンがいます。どの番号でしょう？';
 questionDiv.style.margin = '10px 0';
-document.body.insertBefore(questionDiv, container);
 
 // 「正解を見る」ボタンを作成
 const answerButton = document.createElement('button');
 answerButton.textContent = '正解を見る';
-document.body.insertBefore(answerButton, container);
 
 // 正解（色違いの番号）を表示する要素
 const answerDiv = document.createElement('div');
 answerDiv.style.margin = '10px 0';
-document.body.insertBefore(answerDiv, container);
 
 answerButton.addEventListener('click', () => {
     answerDiv.textContent = `色違いのポケモン番号は #${shinyIndex} です`;
@@ -45,17 +42,20 @@ resultDiv.style.margin = '10px 0';
 
 answerForm.appendChild(answerInput);
 answerForm.appendChild(submitButton);
-document.body.insertBefore(answerForm, container);
-document.body.insertBefore(resultDiv, container);
 
-answerForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (Number(answerInput.value) === shinyIndex) {
-        resultDiv.textContent = '正解！すごい！';
-    } else {
-        resultDiv.textContent = '残念、不正解です。';
-    }
-});
+// 1. 固定ヘッダー用ラッパーを作成
+const fixedHeader = document.createElement('div');
+fixedHeader.className = 'fixed-header';
+
+// 2. まとめてラッパーに追加
+fixedHeader.appendChild(questionDiv);
+fixedHeader.appendChild(answerButton);
+fixedHeader.appendChild(answerDiv);
+fixedHeader.appendChild(answerForm);
+fixedHeader.appendChild(resultDiv);
+
+// 3. containerの前に挿入
+document.body.insertBefore(fixedHeader, container);
 
 // 表示モード選択のドロップダウンを作成
 const modeSelect = document.createElement('select');

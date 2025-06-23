@@ -55,7 +55,8 @@ modeSelect.appendChild(option1);
 modeSelect.appendChild(option2);
 modeSelect.style.margin = '10px 0';
 
-// 問題リセットボタンを作成
+// 問題リセットボタンを作成　
+//
 const resetButton = document.createElement('button');
 resetButton.textContent = '問題をリセット';
 resetButton.style.margin = '10px 0';

@@ -79,3 +79,42 @@ input[type="number"] {
     min-width: 80px;
     max-width: 200px;
 }
+
+/* 回答ボタンを大きくし、文字が見やすいようにする */
+button[type="submit"] {
+    min-width: 100px;
+    font-size: 18px;
+    white-space: nowrap;
+}
+
+/* 入力欄とボタンが縦並びになるように（スマホ幅で） */
+@media (max-width: 600px) {
+    form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    input[type="number"], button[type="submit"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+.fixed-header {
+    position: sticky;
+    top: 0;
+    background: #f5f6fa;
+    z-index: 100;
+    padding-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* app.cssに追加 */
+.pokemon.selected {
+    border: 3px solid #0078d7;
+    box-shadow: 0 0 8px #0078d7;
+}

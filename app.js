@@ -6,43 +6,18 @@ const baseURL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprite
 // ランダムで1体だけ色違いにする
 const shinyIndex = Math.floor(Math.random() * 151) + 1;
 
-for (let i = 1; i <= 151; i++) {
-    const pokemonDiv = document.createElement('div');
-    pokemonDiv.classList.add('pokemon');
-
-    const label = document.createElement('span');
-    label.innerText = `#${i}`;
-
-    const img = document.createElement('img');
-    // 色違い画像のURL（shiny）に切り替え
-    if (i === shinyIndex) {
-        img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png`;
-        img.alt = '色違いポケモン';
-    } else {
-        img.src = `${baseURL}${i}.png`;
-        img.alt = '通常ポケモン';
-    }
-
-    pokemonDiv.appendChild(img);
-    pokemonDiv.appendChild(label);
-    container.appendChild(pokemonDiv);
-}
-
 // 問題文を表示
 const questionDiv = document.createElement('div');
 questionDiv.textContent = '151匹の中に1匹だけ色違いのポケモンがいます。どの番号でしょう？';
 questionDiv.style.margin = '10px 0';
-document.body.insertBefore(questionDiv, container);
 
 // 「正解を見る」ボタンを作成
 const answerButton = document.createElement('button');
 answerButton.textContent = '正解を見る';
-document.body.insertBefore(answerButton, container);
 
 // 正解（色違いの番号）を表示する要素
 const answerDiv = document.createElement('div');
 answerDiv.style.margin = '10px 0';
-document.body.insertBefore(answerDiv, container);
 
 answerButton.addEventListener('click', () => {
     answerDiv.textContent = `色違いのポケモン番号は #${shinyIndex} です`;
@@ -67,17 +42,20 @@ resultDiv.style.margin = '10px 0';
 
 answerForm.appendChild(answerInput);
 answerForm.appendChild(submitButton);
-document.body.insertBefore(answerForm, container);
-document.body.insertBefore(resultDiv, container);
 
-answerForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (Number(answerInput.value) === shinyIndex) {
-        resultDiv.textContent = '正解！すごい！';
-    } else {
-        resultDiv.textContent = '残念、不正解です。';
-    }
-});
+// 1. 固定ヘッダー用ラッパーを作成
+const fixedHeader = document.createElement('div');
+fixedHeader.className = 'fixed-header';
+
+// 2. まとめてラッパーに追加
+fixedHeader.appendChild(questionDiv);
+fixedHeader.appendChild(answerButton);
+fixedHeader.appendChild(answerDiv);
+fixedHeader.appendChild(answerForm);
+fixedHeader.appendChild(resultDiv);
+
+// 3. containerの前に挿入
+document.body.insertBefore(fixedHeader, container);
 
 // 表示モード選択のドロップダウンを作成
 const modeSelect = document.createElement('select');
@@ -105,18 +83,34 @@ function clearPokemon() {
     }
 }
 
+// ポケモン名を取得して表示する部分を追加
+async function getPokemonName(id) {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`);
+    const data = await res.json();
+    // 日本語名を取得
+    const jpName = data.names.find(n => n.language.name === 'ja');
+    return jpName ? jpName.name : data.name;
+}
+
 // ポケモンを表示する関数
-function showPokemon(mode) {
+async function showPokemon(mode) {
     clearPokemon();
+    let selectedNumber = null; // 選択中の番号を管理
     const randomIndex = Math.floor(Math.random() * 151) + 1;
+    // 番号とdivの対応を保存
+    const pokemonDivMap = {};
+
     for (let i = 1; i <= 151; i++) {
         const pokemonDiv = document.createElement('div');
         pokemonDiv.classList.add('pokemon');
+        pokemonDivMap[i] = pokemonDiv; // 番号とdivを紐づけ
+
         const label = document.createElement('span');
-        label.innerText = `#${i}`;
+        getPokemonName(i).then(name => {
+            label.innerHTML = `#${i}<br>${name}`;
+        });
         const img = document.createElement('img');
         if (mode === 'shinyOne') {
-            // 1匹だけ色違い
             if (i === randomIndex) {
                 img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png`;
                 img.alt = '色違いポケモン';
@@ -125,7 +119,6 @@ function showPokemon(mode) {
                 img.alt = '通常ポケモン';
             }
         } else {
-            // 1匹だけ通常色（難易度高いことを明記）
             if (i === randomIndex) {
                 img.src = `${baseURL}${i}.png`;
                 img.alt = '通常ポケモン';
@@ -134,35 +127,63 @@ function showPokemon(mode) {
                 img.alt = '色違いポケモン';
             }
         }
+        // 画像クリックで選択・入力欄に反映＆枠付与
+        pokemonDiv.addEventListener('click', () => {
+            selectedNumber = i;
+            answerInput.value = i;
+            document.querySelectorAll('.pokemon.selected').forEach(el => el.classList.remove('selected'));
+            pokemonDiv.classList.add('selected');
+        });
         pokemonDiv.appendChild(img);
         pokemonDiv.appendChild(label);
         container.appendChild(pokemonDiv);
     }
+
+    // 入力欄の値が変わったときも強調表示を変更
+    answerInput.addEventListener('input', () => {
+        const val = Number(answerInput.value);
+        document.querySelectorAll('.pokemon.selected').forEach(el => el.classList.remove('selected'));
+        if (pokemonDivMap[val]) {
+            pokemonDivMap[val].classList.add('selected');
+        }
+    });
+
     // 問題文・正解番号を更新
     if (mode === 'shinyOne') {
         questionDiv.textContent = '151匹の中に1匹だけ色違いのポケモンがいます。どの番号でしょう？';
-        answerButton.onclick = () => {
-            answerDiv.textContent = `色違いのポケモン番号は #${randomIndex} です`;
+        answerButton.onclick = async () => {
+            const name = await getPokemonName(randomIndex);
+            // 通常色と色違いの画像URL（サイズを128pxに変更）
+            const normalImg = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${randomIndex}.png" alt="通常色" style="width:128px;height:128px;">`;
+            const shinyImg = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${randomIndex}.png" alt="色違い" style="width:128px;height:128px;">`;
+            answerDiv.innerHTML = `
+                正解は #${randomIndex} ${name} です<br>
+                <span>通常色</span>${normalImg}
+                <span style="margin-left:16px;">色違い</span>${shinyImg}
+            `;
         };
-        answerForm.onsubmit = (e) => {
+        answerForm.onsubmit = async (e) => {
             e.preventDefault();
             if (Number(answerInput.value) === randomIndex) {
                 resultDiv.textContent = '正解！すごい！';
             } else {
-                resultDiv.textContent = '残念、不正解です。';
+                const name = await getPokemonName(randomIndex);
+                resultDiv.textContent = `残念、不正解です。正解は #${randomIndex} ${name} です。`;
             }
         };
     } else {
-        questionDiv.textContent = '151匹の中に1匹だけ通常色のポケモンがいます（このモードは難易度が高いです）。どの番号でしょう？'; // ←ここを修正
-        answerButton.onclick = () => {
-            answerDiv.textContent = `通常色のポケモン番号は #${randomIndex} です`;
+        questionDiv.textContent = '151匹の中に1匹だけ通常色のポケモンがいます（このモードは難易度が高いです）。どの番号でしょう？';
+        answerButton.onclick = async () => {
+            const name = await getPokemonName(randomIndex);
+            answerDiv.textContent = `通常色のポケモン番号は #${randomIndex} ${name} です`;
         };
-        answerForm.onsubmit = (e) => {
+        answerForm.onsubmit = async (e) => {
             e.preventDefault();
             if (Number(answerInput.value) === randomIndex) {
                 resultDiv.textContent = '正解！すごい！';
             } else {
-                resultDiv.textContent = '残念、不正解です。';
+                const name = await getPokemonName(randomIndex);
+                resultDiv.textContent = `残念、不正解です。正解は #${randomIndex} ${name} です。`;
             }
         };
     }
@@ -183,3 +204,4 @@ resetButton.addEventListener('click', () => {
     resultDiv.textContent = '';
     answerInput.value = '';
 });
+

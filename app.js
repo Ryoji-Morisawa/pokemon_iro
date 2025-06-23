@@ -131,28 +131,32 @@ async function showPokemon(mode) {
     // 問題文・正解番号を更新
     if (mode === 'shinyOne') {
         questionDiv.textContent = '151匹の中に1匹だけ色違いのポケモンがいます。どの番号でしょう？';
-        answerButton.onclick = () => {
-            answerDiv.textContent = `色違いのポケモン番号は #${randomIndex} です`;
+        answerButton.onclick = async () => {
+            const name = await getPokemonName(randomIndex);
+            answerDiv.textContent = `色違いのポケモン番号は #${randomIndex} ${name} です`;
         };
-        answerForm.onsubmit = (e) => {
+        answerForm.onsubmit = async (e) => {
             e.preventDefault();
             if (Number(answerInput.value) === randomIndex) {
                 resultDiv.textContent = '正解！すごい！';
             } else {
-                resultDiv.textContent = '残念、不正解です。';
+                const name = await getPokemonName(randomIndex);
+                resultDiv.textContent = `残念、不正解です。正解は #${randomIndex} ${name} です。`;
             }
         };
     } else {
-        questionDiv.textContent = '151匹の中に1匹だけ通常色のポケモンがいます（このモードは難易度が高いです）。どの番号でしょう？'; // ←ここを修正
-        answerButton.onclick = () => {
-            answerDiv.textContent = `通常色のポケモン番号は #${randomIndex} です`;
+        questionDiv.textContent = '151匹の中に1匹だけ通常色のポケモンがいます（このモードは難易度が高いです）。どの番号でしょう？';
+        answerButton.onclick = async () => {
+            const name = await getPokemonName(randomIndex);
+            answerDiv.textContent = `通常色のポケモン番号は #${randomIndex} ${name} です`;
         };
-        answerForm.onsubmit = (e) => {
+        answerForm.onsubmit = async (e) => {
             e.preventDefault();
             if (Number(answerInput.value) === randomIndex) {
                 resultDiv.textContent = '正解！すごい！';
             } else {
-                resultDiv.textContent = '残念、不正解です。';
+                const name = await getPokemonName(randomIndex);
+                resultDiv.textContent = `残念、不正解です。正解は #${randomIndex} ${name} です。`;
             }
         };
     }

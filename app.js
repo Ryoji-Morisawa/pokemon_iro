@@ -177,3 +177,4 @@ resetButton.addEventListener('click', () => {
     resultDiv.textContent = '';
     answerInput.value = '';
 });
+

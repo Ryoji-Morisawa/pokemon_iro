@@ -43,20 +43,6 @@ resultDiv.style.margin = '10px 0';
 answerForm.appendChild(answerInput);
 answerForm.appendChild(submitButton);
 
-// 1. 固定ヘッダー用ラッパーを作成
-const fixedHeader = document.createElement('div');
-fixedHeader.className = 'fixed-header';
-
-// 2. まとめてラッパーに追加
-fixedHeader.appendChild(questionDiv);
-fixedHeader.appendChild(answerButton);
-fixedHeader.appendChild(answerDiv);
-fixedHeader.appendChild(answerForm);
-fixedHeader.appendChild(resultDiv);
-
-// 3. containerの前に挿入
-document.body.insertBefore(fixedHeader, container);
-
 // 表示モード選択のドロップダウンを作成
 const modeSelect = document.createElement('select');
 const option1 = document.createElement('option');
@@ -64,17 +50,31 @@ option1.value = 'shinyOne';
 option1.textContent = '1匹だけ色違い';
 const option2 = document.createElement('option');
 option2.value = 'normalOne';
-option2.textContent = '1匹だけ通常色（難易度高）'; // ←ここを修正
+option2.textContent = '1匹だけ通常色（難易度高）';
 modeSelect.appendChild(option1);
 modeSelect.appendChild(option2);
 modeSelect.style.margin = '10px 0';
-document.body.insertBefore(modeSelect, container);
 
 // 問題リセットボタンを作成
 const resetButton = document.createElement('button');
 resetButton.textContent = '問題をリセット';
 resetButton.style.margin = '10px 0';
-document.body.insertBefore(resetButton, container);
+
+// 1. 固定ヘッダー用ラッパーを作成
+const fixedHeader = document.createElement('div');
+fixedHeader.className = 'fixed-header';
+
+// 2. まとめてラッパーに追加（リセットボタンもここに追加）
+fixedHeader.appendChild(modeSelect);
+fixedHeader.appendChild(questionDiv);
+fixedHeader.appendChild(answerButton);
+fixedHeader.appendChild(answerDiv);
+fixedHeader.appendChild(answerForm);
+fixedHeader.appendChild(resultDiv);
+fixedHeader.appendChild(resetButton); // ← ここを追加
+
+// 3. containerの前に挿入
+document.body.insertBefore(fixedHeader, container);
 
 // ポケモン表示部分をクリアする関数
 function clearPokemon() {
@@ -97,20 +97,17 @@ async function showPokemon(mode) {
     clearPokemon();
     let selectedNumber = null; // 選択中の番号を管理
     const randomIndex = Math.floor(Math.random() * 151) + 1;
-    // 番号とdivの対応を保存
-    const pokemonDivMap = {};
-
     for (let i = 1; i <= 151; i++) {
         const pokemonDiv = document.createElement('div');
         pokemonDiv.classList.add('pokemon');
-        pokemonDivMap[i] = pokemonDiv; // 番号とdivを紐づけ
-
         const label = document.createElement('span');
+        // 名前を取得して表示
         getPokemonName(i).then(name => {
-            label.innerHTML = `#${i}<br>${name}`;
+            label.innerHTML = `#${i}<br>${name}`; // 数字と名前の間で改行
         });
         const img = document.createElement('img');
         if (mode === 'shinyOne') {
+            // 1匹だけ色違い
             if (i === randomIndex) {
                 img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png`;
                 img.alt = '色違いポケモン';
@@ -119,6 +116,7 @@ async function showPokemon(mode) {
                 img.alt = '通常ポケモン';
             }
         } else {
+            // 1匹だけ通常色（難易度高いことを明記）
             if (i === randomIndex) {
                 img.src = `${baseURL}${i}.png`;
                 img.alt = '通常ポケモン';
@@ -131,23 +129,15 @@ async function showPokemon(mode) {
         pokemonDiv.addEventListener('click', () => {
             selectedNumber = i;
             answerInput.value = i;
+            // 全ての選択枠を外す
             document.querySelectorAll('.pokemon.selected').forEach(el => el.classList.remove('selected'));
+            // 今選択したものに枠をつける
             pokemonDiv.classList.add('selected');
         });
         pokemonDiv.appendChild(img);
         pokemonDiv.appendChild(label);
         container.appendChild(pokemonDiv);
     }
-
-    // 入力欄の値が変わったときも強調表示を変更
-    answerInput.addEventListener('input', () => {
-        const val = Number(answerInput.value);
-        document.querySelectorAll('.pokemon.selected').forEach(el => el.classList.remove('selected'));
-        if (pokemonDivMap[val]) {
-            pokemonDivMap[val].classList.add('selected');
-        }
-    });
-
     // 問題文・正解番号を更新
     if (mode === 'shinyOne') {
         questionDiv.textContent = '151匹の中に1匹だけ色違いのポケモンがいます。どの番号でしょう？';

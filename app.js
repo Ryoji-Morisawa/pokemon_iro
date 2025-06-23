@@ -97,17 +97,20 @@ async function showPokemon(mode) {
     clearPokemon();
     let selectedNumber = null; // 選択中の番号を管理
     const randomIndex = Math.floor(Math.random() * 151) + 1;
+    // 番号とdivの対応を保存
+    const pokemonDivMap = {};
+
     for (let i = 1; i <= 151; i++) {
         const pokemonDiv = document.createElement('div');
         pokemonDiv.classList.add('pokemon');
+        pokemonDivMap[i] = pokemonDiv; // 番号とdivを紐づけ
+
         const label = document.createElement('span');
-        // 名前を取得して表示
         getPokemonName(i).then(name => {
-            label.innerHTML = `#${i}<br>${name}`; // 数字と名前の間で改行
+            label.innerHTML = `#${i}<br>${name}`;
         });
         const img = document.createElement('img');
         if (mode === 'shinyOne') {
-            // 1匹だけ色違い
             if (i === randomIndex) {
                 img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png`;
                 img.alt = '色違いポケモン';
@@ -116,7 +119,6 @@ async function showPokemon(mode) {
                 img.alt = '通常ポケモン';
             }
         } else {
-            // 1匹だけ通常色（難易度高いことを明記）
             if (i === randomIndex) {
                 img.src = `${baseURL}${i}.png`;
                 img.alt = '通常ポケモン';
@@ -129,15 +131,23 @@ async function showPokemon(mode) {
         pokemonDiv.addEventListener('click', () => {
             selectedNumber = i;
             answerInput.value = i;
-            // 全ての選択枠を外す
             document.querySelectorAll('.pokemon.selected').forEach(el => el.classList.remove('selected'));
-            // 今選択したものに枠をつける
             pokemonDiv.classList.add('selected');
         });
         pokemonDiv.appendChild(img);
         pokemonDiv.appendChild(label);
         container.appendChild(pokemonDiv);
     }
+
+    // 入力欄の値が変わったときも強調表示を変更
+    answerInput.addEventListener('input', () => {
+        const val = Number(answerInput.value);
+        document.querySelectorAll('.pokemon.selected').forEach(el => el.classList.remove('selected'));
+        if (pokemonDivMap[val]) {
+            pokemonDivMap[val].classList.add('selected');
+        }
+    });
+
     // 問題文・正解番号を更新
     if (mode === 'shinyOne') {
         questionDiv.textContent = '151匹の中に1匹だけ色違いのポケモンがいます。どの番号でしょう？';

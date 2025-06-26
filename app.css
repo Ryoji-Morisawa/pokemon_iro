@@ -112,6 +112,23 @@ button[type="submit"] {
     }
 }
 
+/* スマホ時にフォームやボタンが見切れないように調整 */
+@media (max-width: 600px) {
+    form, .fixed-header form {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    button[type="submit"], button, select, input[type="number"] {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        margin-right: 0;
+    }
+    #container {
+        padding-bottom: 60px; /* ボタンが下で隠れないよう余白を追加 */
+    }
+}
+
 .fixed-header {
     position: sticky;
     top: 0;
@@ -201,4 +218,24 @@ button[type="submit"] {
 .pokemon.selected {
     border: 3px solid #0078d7;
     box-shadow: 0 0 8px #0078d7;
+}
+
+/* スマホ幅でのポケモンカードの調整 */
+@media (max-width: 600px) {
+    .pokemon {
+        width: 100px;
+        min-width: 80px;
+        max-width: 100%;
+        padding: 8px 4px 4px 4px;
+    }
+    .pokemon img {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 4px;
+    }
+    .pokemon span {
+        font-size: 13px;
+        text-align: center;
+        word-break: break-all;
+    }
 }
